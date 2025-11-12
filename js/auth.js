@@ -1,4 +1,30 @@
 // Authentication functionality
+let phoneNumber = '';
+let phonePassword = '';
+
+// Button loading state helpers
+function setButtonLoading(button, loading = true) {
+    if (loading) {
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        // Add spinner if not exists
+        if (!button.querySelector('.spinner')) {
+            const spinner = document.createElement('i');
+            spinner.className = 'spinner';
+            button.appendChild(spinner);
+        }
+    } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+        
+        // Remove spinner
+        const spinner = button.querySelector('.spinner');
+        if (spinner) {
+            spinner.remove();
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Check if user is already logged in
@@ -24,11 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
         clearMessage();
     });
 
+    // Google Sign In/Sign Up
+    document.getElementById('googleLoginBtn').addEventListener('click', signInWithGoogle);
+    document.getElementById('googleSignUpBtn').addEventListener('click', signInWithGoogle);
+
+    // Auth method tabs
+    const authTabs = document.querySelectorAll('.auth-tab');
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const method = tab.dataset.method;
+            switchAuthMethod(method);
+        });
+    });
+
     // Login form submission
     document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        setButtonLoading(submitBtn, true);
 
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -44,11 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 1000);
         } catch (error) {
             showMessage(error.message, 'error');
+            setButtonLoading(submitBtn, false);
         }
     });
 
-    // Register form submission
-    document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+    // Email registration form submission
+    document.getElementById('registerEmailForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('registerName').value;
         const email = document.getElementById('registerEmail').value;
@@ -65,8 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        setButtonLoading(submitBtn, true);
+
         try {
-            // Sign up user
+            // Sign up user directly with Supabase
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -90,17 +136,274 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (profileError) console.error('Profile creation error:', profileError);
             }
 
-            showMessage('Registration successful! Please check your email to confirm your account.', 'success');
+            showMessage('✅ Registration successful! Redirecting to dashboard...', 'success');
             
-            // Auto login after registration (if email confirmation is disabled)
+            // Auto-redirect to dashboard
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
-            }, 2000);
+            }, 1000);
         } catch (error) {
             showMessage(error.message, 'error');
+            setButtonLoading(submitBtn, false);
+        }
+    });
+
+    // Phone registration - Send OTP
+    document.getElementById('registerPhoneForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('registerNamePhone').value;
+        const phone = document.getElementById('registerPhone').value;
+        const password = document.getElementById('registerPasswordPhone').value;
+
+        // Validate phone format (Bangladesh format)
+        const phoneRegex = /^(\+880|880|0)?1[3-9]\d{8}$/;
+        if (!phoneRegex.test(phone)) {
+            showMessage('Please enter a valid Bangladesh phone number (e.g., +8801712345678 or 01712345678)', 'error');
+            return;
+        }
+
+        if (password.length < 6) {
+            showMessage('Password must be at least 6 characters long!', 'error');
+            return;
+        }
+
+        // Store for later use
+        phoneNumber = phone;
+        phonePassword = password;
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        setButtonLoading(submitBtn, true);
+
+        try {
+            // Generate 6-digit OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Hash password for storage
+            const passwordHash = btoa(password); // Simple encoding (use bcrypt in production)
+            
+            // Store OTP in database
+            const { error: otpError } = await supabase
+                .from('phone_otps')
+                .insert([{
+                    phone_number: phone,
+                    otp_code: otp,
+                    full_name: name,
+                    password_hash: passwordHash
+                }]);
+
+            if (otpError) throw otpError;
+
+            // Send OTP via SMS
+            const message = `Your TaskMaster OTP is ${otp}. Valid for 5 minutes. Do not share with anyone.`;
+            
+            // Call backend API to send SMS
+            const serverUrl = window.location.protocol + '//' + window.location.hostname + ':3000';
+            
+            const smsResponse = await fetch(serverUrl + '/api/send-sms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phoneNumber: phone,
+                    message: message
+                })
+            });
+
+            const smsResult = await smsResponse.json();
+
+            if (!smsResult.success) {
+                throw new Error(smsResult.message || 'Failed to send SMS. Please try again.');
+            }
+
+            showMessage('📱 OTP sent to your phone! Please check your messages.', 'success');
+            
+            // Show OTP verification form
+            document.getElementById('registerPhoneForm').style.display = 'none';
+            document.getElementById('verifyOtpForm').style.display = 'block';
+            setButtonLoading(submitBtn, false);
+        } catch (error) {
+            showMessage(error.message, 'error');
+            setButtonLoading(submitBtn, false);
+        }
+    });
+
+    // OTP verification form submission
+    document.getElementById('verifyOtpForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otpCode = document.getElementById('otpCode').value;
+
+        if (otpCode.length !== 6) {
+            showMessage('Please enter a valid 6-digit OTP code', 'error');
+            return;
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        setButtonLoading(submitBtn, true);
+
+        try {
+            // Verify OTP from database
+            const { data: otpData, error: otpError } = await supabase
+                .from('phone_otps')
+                .select('*')
+                .eq('phone_number', phoneNumber)
+                .eq('otp_code', otpCode)
+                .eq('verified', false)
+                .gt('expires_at', new Date().toISOString())
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (otpError || !otpData) {
+                // Increment attempts
+                await supabase
+                    .from('phone_otps')
+                    .update({ attempts: supabase.sql`attempts + 1` })
+                    .eq('phone_number', phoneNumber)
+                    .eq('verified', false);
+
+                throw new Error('Invalid or expired OTP code. Please try again.');
+            }
+
+            // OTP is valid - Create user account
+            const password = atob(otpData.password_hash);
+            
+            const { data: userData, error: signUpError } = await supabase.auth.signUp({
+                email: `${phoneNumber.replace(/\+/g, '')}@phone.taskmaster.app`, // Create email from phone
+                password: password,
+                phone: phoneNumber,
+                options: {
+                    data: {
+                        full_name: otpData.full_name,
+                        phone_verified: true,
+                        auth_method: 'phone'
+                    }
+                }
+            });
+
+            if (signUpError) throw signUpError;
+
+            // Mark OTP as verified
+            await supabase
+                .from('phone_otps')
+                .update({ verified: true })
+                .eq('id', otpData.id);
+
+            // Create profile
+            if (userData.user) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                        { id: userData.user.id, full_name: otpData.full_name }
+                    ]);
+
+                if (profileError) console.error('Profile creation error:', profileError);
+            }
+
+            showMessage('✅ Phone verified! Logging you in...', 'success');
+            
+            // Auto-login and redirect
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        } catch (error) {
+            showMessage(error.message || 'OTP verification failed', 'error');
+            setButtonLoading(submitBtn, false);
+        }
+    });
+
+    // Resend OTP button
+    document.getElementById('resendOtpBtn').addEventListener('click', async (e) => {
+        if (!phoneNumber || !phonePassword) {
+            showMessage('Please start the registration process again', 'error');
+            return;
+        }
+
+        const resendBtn = e.target;
+        setButtonLoading(resendBtn, true);
+
+        try {
+            // Generate new OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const name = document.getElementById('registerNamePhone').value;
+            const passwordHash = btoa(phonePassword);
+            
+            // Delete old unverified OTPs for this phone number
+            await supabase
+                .from('phone_otps')
+                .delete()
+                .eq('phone_number', phoneNumber)
+                .eq('verified', false);
+            
+            // Store new OTP in database
+            const { error: otpError } = await supabase
+                .from('phone_otps')
+                .insert([{
+                    phone_number: phoneNumber,
+                    otp_code: otp,
+                    full_name: name,
+                    password_hash: passwordHash
+                }]);
+
+            if (otpError) throw otpError;
+
+            // Send OTP via SMS
+            const message = `Your TaskMaster OTP is ${otp}. Valid for 5 minutes. Do not share with anyone.`;
+            
+            const serverUrl = window.location.protocol + '//' + window.location.hostname + ':3000';
+            
+            const smsResponse = await fetch(serverUrl + '/api/send-sms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    message: message
+                })
+            });
+
+            const smsResult = await smsResponse.json();
+
+            if (!smsResult.success) {
+                throw new Error(smsResult.message || 'Failed to send SMS. Please try again.');
+            }
+
+            showMessage('📱 OTP resent! Please check your messages.', 'success');
+        } catch (error) {
+            showMessage(error.message, 'error');
+        } finally {
+            setButtonLoading(resendBtn, false);
         }
     });
 });
+
+// Switch between auth methods
+function switchAuthMethod(method) {
+    // Update tabs
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.method === method) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Update forms
+    document.querySelectorAll('.auth-method-form').forEach(form => {
+        form.classList.remove('active');
+        form.style.display = 'none';
+    });
+
+    if (method === 'email') {
+        document.getElementById('registerEmailForm').classList.add('active');
+        document.getElementById('registerEmailForm').style.display = 'block';
+    } else if (method === 'phone') {
+        document.getElementById('registerPhoneForm').classList.add('active');
+        document.getElementById('registerPhoneForm').style.display = 'block';
+    }
+
+    clearMessage();
+}
 
 async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -121,3 +424,31 @@ function clearMessage() {
     messageDiv.className = 'auth-message';
 }
 
+// Google Sign In
+async function signInWithGoogle(event) {
+    const button = event.target.closest('button');
+    setButtonLoading(button, true);
+    
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/dashboard.html',
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                }
+            }
+        });
+
+        if (error) throw error;
+
+        // The redirect will happen automatically
+        // No need to show message as user will be redirected to Google
+
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        showMessage('Failed to sign in with Google: ' + error.message, 'error');
+        setButtonLoading(button, false);
+    }
+}

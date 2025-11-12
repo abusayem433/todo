@@ -1,23 +1,32 @@
 {
   "name": "taskmaster-todo-app",
   "version": "1.0.0",
-  "description": "Advanced Task Manager App with Supabase backend",
+  "description": "Advanced Task Manager App with Supabase backend and Bangladesh SMS Gateway",
   "main": "index.html",
   "scripts": {
-    "start": "npx http-server -p 8000 -o",
-    "dev": "npx http-server -p 8000"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "npx http-server -p 8080 -o"
   },
   "keywords": [
     "todo",
     "task-manager",
     "productivity",
     "supabase",
-    "javascript"
+    "javascript",
+    "sms",
+    "otp"
   ],
   "author": "",
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
   "repository": {
     "type": "git",
     "url": ""

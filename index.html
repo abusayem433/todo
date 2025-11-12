@@ -19,6 +19,17 @@
             <!-- Login Form -->
             <div id="loginForm" class="auth-form active">
                 <h2>Welcome Back</h2>
+                
+                <!-- Google Sign In -->
+                <button type="button" id="googleLoginBtn" class="btn-google">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
                 <form id="loginFormElement">
                     <div class="form-group">
                         <label for="loginEmail">
@@ -36,7 +47,7 @@
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-sign-in-alt"></i>
-                        Login
+                        Login with Email
                     </button>
                     <div class="form-footer">
                         <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
@@ -47,7 +58,31 @@
             <!-- Register Form -->
             <div id="registerForm" class="auth-form">
                 <h2>Create Account</h2>
-                <form id="registerFormElement">
+                
+                <!-- Google Sign Up -->
+                <button type="button" id="googleSignUpBtn" class="btn-google">
+                    <i class="fab fa-google"></i>
+                    Sign up with Google
+                </button>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Auth Method Tabs -->
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab active" data-method="email">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </button>
+                    <button type="button" class="auth-tab" data-method="phone">
+                        <i class="fas fa-mobile-alt"></i>
+                        Phone
+                    </button>
+                </div>
+
+                <!-- Email Registration -->
+                <form id="registerEmailForm" class="auth-method-form active">
                     <div class="form-group">
                         <label for="registerName">
                             <i class="fas fa-user"></i>
@@ -78,12 +113,89 @@
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-user-plus"></i>
-                        Register
+                        Register with Email
                     </button>
-                    <div class="form-footer">
-                        <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+                    <p class="auth-note">
+                        <i class="fas fa-info-circle"></i>
+                        Create your account and start organizing tasks instantly.
+                    </p>
+                </form>
+
+                <!-- Phone Registration -->
+                <form id="registerPhoneForm" class="auth-method-form">
+                    <div class="form-group">
+                        <label for="registerNamePhone">
+                            <i class="fas fa-user"></i>
+                            Full Name
+                        </label>
+                        <input type="text" id="registerNamePhone" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone">
+                            <i class="fas fa-mobile-alt"></i>
+                            Phone Number
+                        </label>
+                        <input type="tel" id="registerPhone" required placeholder="+8801712345678 or 01712345678" pattern="^(\+880|880|0)?1[3-9]\d{8}$">
+                        <small>Format: +8801712345678 or 01712345678 (Bangladesh numbers only)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPasswordPhone">
+                            <i class="fas fa-lock"></i>
+                            Password
+                        </label>
+                        <input type="password" id="registerPasswordPhone" required placeholder="Create a password" minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary" id="sendOtpBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        Send OTP
+                    </button>
+                    <p class="auth-note">
+                        <i class="fas fa-info-circle"></i>
+                        You'll receive an OTP via SMS to verify your phone number.
+                    </p>
+                </form>
+
+                <!-- OTP Verification Form -->
+                <form id="verifyOtpForm" class="auth-method-form" style="display: none;">
+                    <div class="otp-header">
+                        <i class="fas fa-mobile-screen-button"></i>
+                        <h3>Verify Your Phone</h3>
+                        <p>We've sent a 6-digit code to your phone</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="otpCode">
+                            <i class="fas fa-key"></i>
+                            Enter OTP Code
+                        </label>
+                        <input type="text" id="otpCode" required placeholder="Enter 6-digit code" maxlength="6" pattern="\d{6}" autocomplete="off" inputmode="numeric">
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-check-circle"></i>
+                        Verify & Register
+                    </button>
+
+                    <div class="resend-section">
+                        <p class="resend-text">
+                            <i class="fas fa-clock"></i>
+                            Didn't receive the code?
+                        </p>
+                        <button type="button" class="btn-resend" id="resendOtpBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Resend OTP
+                        </button>
+                    </div>
+
+                    <div class="otp-note">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>OTP is valid for 5 minutes</span>
                     </div>
                 </form>
+
+                <div class="form-footer">
+                    <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+                </div>
             </div>
 
             <div id="authMessage" class="auth-message"></div>

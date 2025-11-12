@@ -94,10 +94,26 @@ function hasTasksOnDate(date) {
     
     return allTasks.some(task => {
         if (task.archived) return false;
+        
+        // Check if this is the original deadline date
         const taskDate = new Date(task.deadline);
-        return taskDate >= dateStart && taskDate < dateEnd;
+        if (taskDate >= dateStart && taskDate < dateEnd) {
+            return true;
+        }
+        
+        // Check if this date matches a recurring occurrence
+        if (task.recurring && ['daily', 'weekly', 'monthly'].includes(task.recurring)) {
+            return isRecurringTaskOnDate(task, date);
+        }
+        
+        return false;
     });
 }
+
+// Check if a recurring task occurs on a specific date
+// This function is now defined in app.js and shared across the application
+// Keeping this here for backward compatibility, but it should use the one from app.js
+// The function in app.js will be used since it's loaded first
 
 // Select a date on the calendar
 function selectCalendarDate(date) {
@@ -121,19 +137,29 @@ function renderSelectedDateTasks() {
     
     const tasksForDate = allTasks.filter(task => {
         if (task.archived) return false;
+        
+        // Check if this is the original deadline date
         const taskDate = new Date(task.deadline);
-        return taskDate >= dateStart && taskDate < dateEnd;
+        if (taskDate >= dateStart && taskDate < dateEnd) {
+            return true;
+        }
+        
+        // Check if this date matches a recurring occurrence
+        if (task.recurring && ['daily', 'weekly', 'monthly'].includes(task.recurring)) {
+            return isRecurringTaskOnDate(task, selectedDate);
+        }
+        
+        return false;
     });
     
     if (tasksForDate.length === 0) {
         container.innerHTML = `
-            <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fas fa-calendar-check"></i>
-                <h3>No tasks</h3>
-                <p>No tasks scheduled for ${selectedDate.toLocaleDateString('en-US', { 
+            <div class="empty-state" style="padding: 30px 20px;">
+                <i class="fas fa-calendar-check" style="font-size: 48px; opacity: 0.3; margin-bottom: 12px;"></i>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">No tasks</h3>
+                <p style="font-size: 14px;">No tasks scheduled for ${selectedDate.toLocaleDateString('en-US', { 
                     weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
+                    month: 'short', 
                     day: 'numeric' 
                 })}</p>
             </div>
@@ -142,7 +168,7 @@ function renderSelectedDateTasks() {
     }
     
     container.innerHTML = `
-        <h4 style="margin-bottom: 16px; color: var(--text-primary);">
+        <h4 style="margin-bottom: 16px; color: var(--text-primary); font-size: 16px;">
             ${selectedDate.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -150,10 +176,28 @@ function renderSelectedDateTasks() {
                 day: 'numeric' 
             })}
         </h4>
-        <div class="tasks-list" style="gap: 12px;">
-            ${tasksForDate.map(task => createTaskHTML(task)).join('')}
+        <div id="selectedDateTasksList" class="tasks-list" style="gap: 10px;">
+            ${tasksForDate.map(task => {
+                // Add a recurring indicator if this is a recurring task
+                const isOriginalDate = new Date(task.deadline).toDateString() === selectedDate.toDateString();
+                const taskHTML = createTaskHTML(task);
+                
+                if (task.recurring && ['daily', 'weekly', 'monthly'].includes(task.recurring) && !isOriginalDate) {
+                    return taskHTML.replace(
+                        '<div class="task-meta">',
+                        `<div class="task-meta"><span class="task-badge" style="background: #dbeafe; color: #1e40af;">
+                            <i class="fas fa-repeat"></i> Recurring: ${capitalizeFirst(task.recurring)}
+                        </span>`
+                    );
+                }
+                
+                return taskHTML;
+            }).join('')}
         </div>
     `;
+    
+    // Initialize drag and drop for selected date tasks
+    setTimeout(() => initializeCalendarDateDragDrop(), 100);
 }
 
 // Navigate to previous month
