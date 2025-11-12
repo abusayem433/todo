@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Daily Reminder Popup -->
+    <div id="dailyReminderModal" class="modal">
+        <div class="modal-content reminder-modal">
+            <span class="close-modal">&times;</span>
+            <div class="reminder-header">
+                <i class="fas fa-bell"></i>
+                <h2>Daily Task Reminder</h2>
+            </div>
+            <div id="reminderContent" class="reminder-content">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalTitle">Add New Task</h2>
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+                <div class="form-group">
+                    <label for="taskTitle">
+                        <i class="fas fa-heading"></i>
+                        Task Title *
+                    </label>
+                    <input type="text" id="taskTitle" required placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="taskDescription" rows="3" placeholder="Enter task description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskDeadline">
+                            <i class="fas fa-calendar"></i>
+                            Deadline *
+                        </label>
+                        <input type="datetime-local" id="taskDeadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">
+                            <i class="fas fa-flag"></i>
+                            Priority *
+                        </label>
+                        <select id="taskPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskCategory">
+                            <i class="fas fa-folder"></i>
+                            Category *
+                        </label>
+                        <select id="taskCategory" required>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="study">Study</option>
+                            <option value="health">Health</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskRecurring">
+                            <i class="fas fa-repeat"></i>
+                            Recurring
+                        </label>
+                        <select id="taskRecurring">
+                            <option value="none">None</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelTask">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-tasks"></i>
+            <h2>TaskMaster</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                <i class="fas fa-th-large"></i>
+                Dashboard
+            </a>
+            <a href="#tasks" class="nav-item" data-view="tasks">
+                <i class="fas fa-list"></i>
+                All Tasks
+            </a>
+            <a href="#calendar" class="nav-item" data-view="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                Calendar
+            </a>
+            <a href="#archive" class="nav-item" data-view="archive">
+                <i class="fas fa-archive"></i>
+                Archive
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="userName">User</span>
+            </div>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search tasks...">
+            </div>
+            <button id="addTaskBtn" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                Add Task
+            </button>
+        </header>
+
+        <!-- Dashboard View -->
+        <section id="dashboardView" class="view active">
+            <h1>Dashboard</h1>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #4CAF50;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="completedCount">0</h3>
+                        <p>Completed Tasks</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #FF9800;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="pendingCount">0</h3>
+                        <p>Pending Tasks</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f44336;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="overdueCount">0</h3>
+                        <p>Overdue Tasks</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #2196F3;">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="todayCount">0</h3>
+                        <p>Due Today</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>Task Overview</h2>
+                <canvas id="taskChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tasks View -->
+        <section id="tasksView" class="view">
+            <h1>All Tasks</h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filterCategory">
+                        <i class="fas fa-folder"></i>
+                        Category
+                    </label>
+                    <select id="filterCategory">
+                        <option value="all">All Categories</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="study">Study</option>
+                        <option value="health">Health</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterPriority">
+                        <i class="fas fa-flag"></i>
+                        Priority
+                    </label>
+                    <select id="filterPriority">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">
+                        <i class="fas fa-tasks"></i>
+                        Status
+                    </label>
+                    <select id="filterStatus">
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+            </div>
+            <div id="tasksList" class="tasks-list">
+                <!-- Tasks will be populated here -->
+            </div>
+        </section>
+
+        <!-- Calendar View -->
+        <section id="calendarView" class="view">
+            <h1>Calendar</h1>
+            <div class="calendar-controls">
+                <button id="prevMonth" class="btn-icon">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 id="currentMonth">Month Year</h2>
+                <button id="nextMonth" class="btn-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div id="calendar" class="calendar-grid">
+                <!-- Calendar will be generated here -->
+            </div>
+            <div id="calendarTasksList" class="calendar-tasks">
+                <h3>Tasks for selected date</h3>
+                <div id="selectedDateTasks">
+                    <!-- Tasks for selected date -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Archive View -->
+        <section id="archiveView" class="view">
+            <h1>Archived Tasks</h1>
+            <div id="archiveList" class="tasks-list">
+                <!-- Archived tasks will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/dragdrop.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,30 @@
+{
+  "name": "taskmaster-todo-app",
+  "version": "1.0.0",
+  "description": "Advanced Task Manager App with Supabase backend",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000 -o",
+    "dev": "npx http-server -p 8000"
+  },
+  "keywords": [
+    "todo",
+    "task-manager",
+    "productivity",
+    "supabase",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": {
+    "url": ""
+  },
+  "homepage": ""
+}
+
