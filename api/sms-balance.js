@@ -1,5 +1,5 @@
 // Vercel serverless function for checking SMS balance
-const fetch = require('node-fetch');
+// Using native fetch (available in Node.js 18+)
 
 // SMS Gateway Configuration
 const SMS_CONFIG = {
