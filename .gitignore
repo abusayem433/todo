@@ -1,19 +1,29 @@
-# Node modules
+# Dependencies
 node_modules/
-package-lock.json
+/.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
 
 # Logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# Environment variables (if you create any)
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env*.local
 
 # IDE specific files
 .vscode/
@@ -21,17 +31,61 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
 # OS specific files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
-# Build outputs (if any)
+# Build outputs
 dist/
 build/
+out/
+.next/
+.nuxt/
+.cache/
+
+# Deployment
+.vercel/
+.netlify/
+.serverless/
 
 # Temporary files
 *.tmp
+*.temp
 tmp/
 temp/
+.cache/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.parcel-cache
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional stylelint cache
+.stylelintcache
 
