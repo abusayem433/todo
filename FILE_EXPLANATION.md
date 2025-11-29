@@ -2,6 +2,29 @@
 
 This document explains the purpose and functionality of each file in the TaskMaster project. Use this to understand what each file does and explain it to your teacher.
 
+## 📋 Project Overview
+
+### Problem Statement
+Students and individuals struggle to organize daily tasks and assignments effectively. Without a proper task management system, users face difficulties in tracking multiple tasks, prioritizing work, remembering deadlines, organizing by categories, visualizing upcoming tasks, and managing recurring tasks efficiently.
+
+### Project Goal
+Build a comprehensive to-do application (TaskMaster) that helps users track tasks and deadlines effectively through an intuitive interface, multiple visualization options, a unique daily reminder system, and comprehensive task organization features.
+
+### Core Features (All 13 Required Features)
+1. Login / Register (Email, Phone with OTP, Google OAuth)
+2. Logout Functionality
+3. Task CRUD (Add, Update, Delete, Mark Complete)
+4. Deadlines with Color-Coded Priority (High-Red, Medium-Orange, Low-Green)
+5. Archive Completed Tasks
+6. Simple Calendar View
+7. Daily Reminder Popup/Notification (Unique Feature)
+8. Filter Tasks by Category or Priority
+9. Drag-and-Drop Reordering
+10. Search Tasks by Keyword
+11. Dashboard Analytics (Completed vs Pending)
+12. Recurring Tasks (Daily, Weekly, Monthly)
+13. Tech Stack: HTML, CSS, JS + Node.js/Express + Supabase (PostgreSQL)
+
 ---
 
 ## 📁 Project Structure Overview
@@ -45,26 +68,29 @@ The project is organized into several directories:
 **What it does:**
 - Main interface after user logs in
 - Contains four main views:
-  1. **Dashboard View** - Statistics, charts, and overview
-  2. **Tasks View** - List of all tasks with filtering and search
-  3. **Calendar View** - Calendar showing tasks by date
+  1. **Dashboard View** - Statistics showing completed vs pending tasks, charts, and overview
+  2. **Tasks View** - List of all tasks with filtering by category/priority and search by keyword
+  3. **Calendar View** - Simple calendar interface showing upcoming tasks organized by date
   4. **Archive View** - Completed/archived tasks
 - Includes:
   - Sidebar navigation
-  - Task creation/editing modal
-  - Daily reminder popup
+  - Task creation/editing modal with color-coded priority selection
+  - **Daily Reminder Popup** ⭐ (Unique Feature) - Shows tasks due today when user first logs in
   - User profile display
   - Logout functionality
 - Links to JavaScript files: `supabase.js`, `app.js`, `calendar.js`, and `dragdrop.js`
-- Uses Chart.js library for data visualization
-- Uses SortableJS library for drag-and-drop functionality
+- Uses Chart.js library for data visualization (4 charts: category, priority, completion, monthly progress)
+- Uses SortableJS library for drag-and-drop task reordering
 
 **Key Features:**
 - Real-time task management
-- Interactive charts and statistics
-- Drag-and-drop task reordering
-- Task filtering and search
+- Interactive charts and statistics (completed vs pending tasks)
+- Drag-and-drop task reordering with persistent storage
+- Task filtering by category or priority
+- Search tasks by keyword
+- Color-coded priority system (Red-High, Orange-Medium, Green-Low)
 - Calendar integration
+- Daily reminder notification system
 
 ---
 
@@ -292,9 +318,10 @@ The project is organized into several directories:
   - **Global styles** - Reset, variables, base styles
   - **Auth page styles** - Login/registration page styling
   - **Dashboard styles** - Main application interface
-  - **Task item styles** - Task card styling
-  - **Modal styles** - Popup dialogs
-  - **Calendar styles** - Calendar view styling
+  - **Task item styles** - Task card styling with color-coded priority indicators
+  - **Priority color coding** - Red for High, Orange for Medium, Green for Low priority
+  - **Modal styles** - Popup dialogs including daily reminder modal
+  - **Calendar styles** - Simple calendar view styling
   - **Responsive design** - Mobile and tablet layouts
   - **Animation styles** - Transitions and effects
   - **Chart styles** - Data visualization styling
@@ -303,8 +330,12 @@ The project is organized into several directories:
 - Complete UI styling
 - Responsive design
 - Modern, clean interface
-- Color-coded priority system
+- **Color-coded priority system** - Visual indicators for task priorities:
+  - High Priority: Red color (#FF0000 or similar)
+  - Medium Priority: Orange color (#FFA500 or similar)
+  - Low Priority: Green color (#00FF00 or similar)
 - Dark/light theme support
+- Daily reminder popup styling
 
 ---
 
@@ -333,25 +364,27 @@ The project is organized into several directories:
 **Purpose:** Authentication logic
 
 **What it does:**
-- Handles all authentication functionality:
+- Handles all authentication functionality (Feature #1 - Login/Register):
   - **Email/Password login** - Validates and authenticates users
-  - **Email registration** - Creates new user accounts
-  - **Phone registration** - Handles phone number registration with OTP
-  - **OTP verification** - Verifies SMS OTP codes
-  - **Google OAuth** - Handles Google sign-in
+  - **Email registration** - Creates new user accounts with email, password, and full name
+  - **Phone registration** - Handles Bangladesh phone number registration with OTP verification
+  - **OTP verification** - Verifies 6-digit SMS OTP codes (valid for 5 minutes)
+  - **Google OAuth** - Handles one-click Google sign-in
 - Manages form switching (login ↔ registration)
-- Handles OTP sending and verification
-- Creates user profiles in database
+- Handles OTP sending and verification via SMS API
+- Creates user profiles in database automatically
 - Integrates with SMS API for OTP delivery
 - Shows error messages and success notifications
 - Redirects authenticated users to dashboard
+- **Logout functionality** (Feature #2) - Terminates user session and redirects to login
 
 **Key Features:**
-- Multiple authentication methods
-- OTP verification system
-- Form validation
-- Error handling
-- User profile creation
+- Multiple authentication methods (Email, Phone OTP, Google OAuth)
+- OTP verification system with expiration
+- Form validation (email format, password length, phone number format)
+- Error handling with user-friendly messages
+- Automatic user profile creation
+- Secure session management
 
 ---
 
@@ -362,39 +395,42 @@ The project is organized into several directories:
 - Core functionality for the task management application:
   - **Task CRUD operations** - Create, Read, Update, Delete tasks
   - **Task loading** - Fetches tasks from Supabase database
-  - **Task rendering** - Displays tasks in the UI
-  - **Task filtering** - Filters tasks by category, priority, status, date
-  - **Task search** - Searches tasks by title and description
+  - **Task rendering** - Displays tasks in the UI with color-coded priority indicators
+  - **Task filtering** - Filters tasks by category (Work, Personal, Study, Health, Other) or priority (High, Medium, Low)
+  - **Task search** - Searches tasks by keyword in title and description
   - **Task completion** - Marks tasks as complete/incomplete
-  - **Recurring tasks** - Creates new tasks for daily/weekly/monthly recurring tasks
-  - **Task archiving** - Archives and unarchives tasks
-  - **Dashboard statistics** - Calculates and displays task statistics
+  - **Recurring tasks** - Creates new task instances for daily/weekly/monthly recurring tasks
+  - **Task archiving** - Archives and unarchives completed tasks
+  - **Dashboard statistics** - Calculates and displays completed vs pending task statistics
   - **Chart rendering** - Creates charts using Chart.js:
     - Tasks by category (doughnut chart)
     - Tasks by priority (bar chart)
-    - Completion status (doughnut chart)
+    - Completion status showing completed vs pending (doughnut chart)
     - Monthly progress (line chart)
-  - **Daily reminders** - Shows daily task reminder popup
+  - **Daily reminders** ⭐ **Unique Feature** - Shows daily task reminder popup when user first logs in each day, displaying tasks due today
   - **View switching** - Manages navigation between Dashboard, Tasks, Calendar, and Archive views
   - **User profile** - Loads and displays user information
-  - **Logout** - Handles user logout
+  - **Logout** - Handles user logout functionality
+  - **Priority color coding** - Applies color indicators (Red-High, Orange-Medium, Green-Low) to tasks
 
 **Key Features:**
-- Complete task management
+- Complete task management (CRUD operations)
 - Real-time data updates
-- Advanced filtering and search
-- Data visualization
-- Recurring task support
-- Daily reminders
+- Advanced filtering by category or priority
+- Search by keyword
+- Data visualization (completed vs pending tasks)
+- Recurring task support (Daily, Weekly, Monthly)
+- Daily reminder notification system (unique feature)
+- Color-coded priority system
 
 ---
 
 ### `js/calendar.js`
-**Purpose:** Calendar view functionality
+**Purpose:** Calendar view functionality (Feature #6 - Simple Calendar View)
 
 **What it does:**
-- Renders interactive calendar grid
-- Displays tasks on their due dates
+- Renders simple interactive calendar grid
+- Displays tasks on their deadline dates
 - Handles month navigation (previous/next month)
 - Highlights today's date
 - Shows tasks for selected date
@@ -404,17 +440,19 @@ The project is organized into several directories:
   - Monthly tasks appear on same day of month
 - Integrates with task data from `app.js`
 - Updates when tasks are added/modified
+- Shows task count indicators on calendar dates
 
 **Key Features:**
-- Interactive calendar
+- Simple calendar interface (Feature #6)
 - Date-based task display
-- Recurring task support
+- Recurring task support (Feature #12)
 - Month navigation
+- Visual task indicators on dates
 
 ---
 
 ### `js/dragdrop.js`
-**Purpose:** Drag-and-drop functionality
+**Purpose:** Drag-and-drop functionality (Feature #9)
 
 **What it does:**
 - Implements drag-and-drop for task reordering
@@ -424,15 +462,15 @@ The project is organized into several directories:
   2. **Archive list** - Reorder archived tasks
   3. **Calendar date tasks** - Reorder tasks for a specific date
 - Updates task order in database when items are moved
-- Maintains order_index in database
+- Maintains order_index in database for persistent storage
 - Provides visual feedback during dragging
 - Prevents dragging empty states
 
 **Key Features:**
-- Intuitive task reordering
-- Persistent order storage
+- Intuitive task reordering (Feature #9)
+- Persistent order storage in database
 - Multiple drag-and-drop contexts
-- Smooth animations
+- Smooth animations and visual feedback
 
 ---
 
@@ -486,11 +524,41 @@ These tables are created in Supabase and accessed via the Supabase client in Jav
 
 ## 📝 Summary
 
-This project is a full-stack task management application:
-- **Frontend:** HTML, CSS, Vanilla JavaScript
-- **Backend:** Supabase (database and authentication)
-- **SMS Service:** Bangladesh SMS Gateway API
-- **Deployment:** Vercel (serverless functions)
+This project is a full-stack task management application designed to solve the problem of organizing daily tasks and assignments:
 
-Each file has a specific purpose and works together to create a complete, functional application for managing tasks with multiple authentication methods, task organization, calendar integration, and data visualization.
+### Problem Solved
+Students and individuals struggle with task organization. TaskMaster provides a comprehensive solution with intuitive task management, visual priority indicators, multiple views, and a unique daily reminder system.
+
+### All 13 Required Features Implemented
+1. ✅ Login / Register (Email, Phone OTP, Google OAuth)
+2. ✅ Logout Functionality
+3. ✅ Task CRUD (Add, Update, Delete, Mark Complete)
+4. ✅ Deadlines with Color-Coded Priority (High-Red, Medium-Orange, Low-Green)
+5. ✅ Archive Completed Tasks
+6. ✅ Simple Calendar View
+7. ✅ Daily Reminder Popup/Notification (Unique Feature)
+8. ✅ Filter Tasks by Category or Priority
+9. ✅ Drag-and-Drop Reordering
+10. ✅ Search Tasks by Keyword
+11. ✅ Dashboard Analytics (Completed vs Pending)
+12. ✅ Recurring Tasks (Daily, Weekly, Monthly)
+13. ✅ Tech Stack: HTML, CSS, JS + Node.js/Express + Supabase (PostgreSQL)
+
+### Technology Stack
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **Backend:** Node.js with Express.js framework
+- **Database:** Supabase (PostgreSQL with Row Level Security)
+- **Authentication:** Supabase Auth (Email/Password, Phone OTP, Google OAuth)
+- **SMS Service:** Bangladesh SMS Gateway API
+- **Deployment:** Vercel (serverless functions) or Node.js Express server
+- **Libraries:** Chart.js (visualization), SortableJS (drag-and-drop)
+
+### Key Design Features
+- **Color-Coded Priority System:** Visual indicators (Red-High, Orange-Medium, Green-Low) help users quickly identify task urgency
+- **Daily Reminder System:** Unique popup notification feature that shows tasks due today when users first log in each day
+- **Comprehensive Task Management:** Full CRUD operations with filtering, searching, and drag-and-drop reordering
+- **Multiple Views:** Dashboard, List, Calendar, and Archive views for different task management needs
+- **Real-Time Updates:** Task changes reflected immediately across all views
+
+Each file has a specific purpose and works together to create a complete, functional application for managing tasks with multiple authentication methods, task organization, calendar integration, data visualization, and the unique daily reminder feature.
 
