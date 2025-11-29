@@ -214,8 +214,8 @@ For production deployment on Vercel:
 ## 📁 Project Structure
 
 ```
-todo-wub/
-├── api/                    # Vercel serverless functions
+todo/
+├── api/                   # Vercel serverless functions
 │   ├── health.js          # Health check endpoint
 │   ├── send-sms.js        # SMS sending function
 │   └── sms-balance.js     # SMS balance check
@@ -227,7 +227,7 @@ todo-wub/
 │   ├── calendar.js        # Calendar functionality
 │   ├── dragdrop.js        # Drag and drop features
 │   └── supabase.js        # Supabase client configuration
-├── dashboard.html          # Main dashboard page
+├── dashboard.html         # Main dashboard page
 ├── index.html             # Login/Registration page
 ├── server.js              # Express server (development)
 ├── vercel.json            # Vercel configuration
@@ -334,8 +334,7 @@ For issues and questions, please open an issue on the repository.
 
 ## 📚 Documentation
 
-- **SRS_Document.md** - Complete Software Requirements Specification following IEEE 830-1998 standard
-- **FILE_EXPLANATION.md** - Detailed explanation of each file in the project
+- **SRS_Document.md** - Complete Software Requirements Specification following IEEE 830-1998 standard. [Click Here](https://docs.google.com/document/d/11tiby7Nj544cOWbmR0VWMhg0AHcFGa8xJenr8emRvII/edit?usp=sharing)
 - **README.md** - This file, providing setup and usage instructions
 
 ## 🎨 Key Design Features
@@ -352,3 +351,29 @@ For issues and questions, please open an issue on the repository.
 
 **Note**: This project uses the Bangladesh SMS Gateway. For international deployments, you may need to configure a different SMS provider.
 
+---
+
+## 📄 Version Information
+
+**Version:** 1.0 (Reviewed & Approved)
+
+## 👥 Development Team
+
+**Developed by:** Full Team
+
+- Md. Abu Sayem - 4386
+- Mahi Bushra Roza - 4021
+- Mohammad Ali Tonmoy - 4023
+- Sandia Mahmud Chowa - 4098
+
+**Reviewed, Approved & Merged by:** Md. Abu Sayem
+
+**Documented by:** Md. Abu Sayem
+
+## 🏫 Organization
+
+**Organization:** CSE Department, World University of Bangladesh
+
+**Date of Completion:** November 2025
+
+---
