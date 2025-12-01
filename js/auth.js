@@ -2,6 +2,37 @@
 let phoneNumber = '';
 let phonePassword = '';
 
+// Helper function to check if input is a phone number
+function isPhoneNumber(input) {
+    // Remove any spaces, dashes, or plus signs for validation
+    const cleaned = input.replace(/[\s\-+]/g, '');
+    // Bangladesh phone number pattern: 880XXXXXXXXX or 0XXXXXXXXX or 1XXXXXXXXX (after cleaning)
+    const phoneRegex = /^(880|0)?1[3-9]\d{8}$/;
+    return phoneRegex.test(cleaned);
+}
+
+// Helper function to format phone number to standard format (880XXXXXXXXX)
+function formatPhoneNumber(phone) {
+    let cleaned = phone.replace(/[\s\-+]/g, '');
+    
+    // Remove leading 880, 0, or + if present
+    if (cleaned.startsWith('880')) {
+        return cleaned;
+    } else if (cleaned.startsWith('0')) {
+        return '880' + cleaned.substring(1);
+    } else if (cleaned.startsWith('1')) {
+        return '880' + cleaned;
+    }
+    
+    return cleaned;
+}
+
+// Helper function to convert phone number to virtual email format
+function phoneToEmail(phone) {
+    const formatted = formatPhoneNumber(phone);
+    return `${formatted}@phone.taskmaster.app`;
+}
+
 // Get server URL - works in both development and production
 // To override in production, set window.API_BASE_URL before loading this script
 // Example: <script>window.API_BASE_URL = 'https://api.yourdomain.com';</script>
@@ -90,19 +121,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login form submission
     document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
+        const emailOrPhone = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         
         const submitBtn = e.target.querySelector('button[type="submit"]');
         setButtonLoading(submitBtn, true);
 
         try {
+            // Determine if input is email or phone number
+            let loginEmail;
+            if (isPhoneNumber(emailOrPhone)) {
+                // Convert phone number to virtual email format
+                loginEmail = phoneToEmail(emailOrPhone);
+                console.log('Detected phone number, using virtual email:', loginEmail);
+            } else {
+                // Use as email directly
+                loginEmail = emailOrPhone;
+                console.log('Detected email, using directly:', loginEmail);
+            }
+
             const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: loginEmail,
                 password
             });
 
-            if (error) throw error;
+            if (error) {
+                // Provide more helpful error messages
+                if (error.message.includes('Invalid login credentials')) {
+                    throw new Error('Invalid email/phone number or password. Please check your credentials and try again.');
+                }
+                throw error;
+            }
 
             showMessage('Login successful! Redirecting...', 'success');
             setTimeout(() => {
